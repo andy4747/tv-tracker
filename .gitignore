@@ -1,5 +1,4 @@
 bin/
 go.sum
-.env
 .idea/
 sqlc
