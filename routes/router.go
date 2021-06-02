@@ -15,6 +15,7 @@ func MainRouter() *gin.Engine {
 		authRoutes.POST("/register", authHandler.Signup)
 		authRoutes.POST("/login", authHandler.Login)
 		authRoutes.GET("/logout", authHandler.Logout)
+		authRoutes.POST("/de-register", authHandler.DeleteUser)
 	}
 	return router
 }
