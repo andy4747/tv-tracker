@@ -137,9 +137,55 @@ func (h *userHandler) Signup(ctx *gin.Context) {
 	//add user credential in the database
 	addedUser, err := h.repo.CreateUser(user)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		ctx.JSON(http.StatusBadRequest, "Email already taken.")
 		return
 	}
 	ctx.JSON(http.StatusOK, addedUser)
+}
+
+func (h *userHandler) DeleteUser(ctx *gin.Context) {
+	var credential util.LoginCredentials
+	if err := ctx.ShouldBindJSON(&credential); err != nil {
+		log.Printf("Invalid JSON entered")
+		ctx.JSON(http.StatusUnprocessableEntity, "enter valid JSON data")
+		return
+	}
+	//validating credentials
+	if credential.Password == "" || credential.Email == "" {
+		log.Printf("enter valid data")
+		ctx.JSON(http.StatusBadRequest, "enter valid email and password")
+		return
+	}
+	retrievedUser, err := h.repo.GetUserByEmail(credential.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No user found with %s as email", credential.Email)
+			ctx.JSON(http.StatusNotFound, fmt.Sprintf("No user found with %s as email", credential.Email))
+			return
+		} else {
+			log.Printf("some server error occurred err: %v", err)
+			ctx.JSON(http.StatusInternalServerError, "somer server error occurred")
+			return
+		}
+	}
+	err = util.ComparePassword(credential.Password, retrievedUser.Password)
+	if err != nil {
+		log.Printf("password don't match\n")
+		ctx.JSON(http.StatusBadRequest, "password don't match. try again...")
+		return
+	}
+	err = h.repo.DeleteUser(retrievedUser.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("user doesn't exist")
+			ctx.JSON(http.StatusNotFound, "user doesn't exists")
+			return
+		} else {
+			log.Printf("some server error occurred err: %v", err)
+			ctx.JSON(http.StatusInternalServerError, "somer server error occurred")
+			return
+		}
+	}
+	ctx.JSON(http.StatusOK, "Successfully Deleted")
 }
