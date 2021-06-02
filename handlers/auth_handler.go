@@ -69,28 +69,35 @@ func (h *userHandler) Login(ctx *gin.Context) {
 	}
 
 	var token string
-	userToken, _ := models.Connect().GetTokenByUser(context.Background(), user.ID)
+	userToken, err := models.Connect().GetTokenByUser(context.Background(), user.ID)
 	token = userToken.Token
-	if (models.Tokens{}) == userToken {
-		generatedToken := util.GenerateTokenUUID()
-		fmt.Println(generatedToken)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			generatedToken := util.GenerateTokenUUID()
+			fmt.Println(generatedToken)
 
-		//saving session token in the db
-		savedToken, err := models.Connect().CreateToken(context.Background(), models.CreateTokenParams{
-			CreatedAt: util.GetCurrentDate(),
-			Token:     generatedToken,
-			UserID:    user.ID,
-		})
-		if err != nil {
-			log.Printf("couldn't save the row to tokens table err: %v\n", err)
-			ctx.JSON(http.StatusInternalServerError, "")
+			//saving session token in the db
+			savedToken, err := models.Connect().CreateToken(context.Background(), models.CreateTokenParams{
+				CreatedAt: util.GetCurrentDate(),
+				Token:     generatedToken,
+				UserID:    user.ID,
+			})
+			if err != nil {
+				log.Printf("couldn't save the row to tokens table err: %v\n", err)
+				ctx.JSON(http.StatusInternalServerError, "")
+				return
+			}
+			fmt.Println("Token Saved")
+			token = savedToken.Token
+			log.Printf("no token row existed so created one")
+		} else {
+			log.Printf("some error occured err: %v\n", err)
+			ctx.JSON(http.StatusInternalServerError, "some error occureed")
 			return
 		}
-		fmt.Println("Token Saved")
-		token = savedToken.Token
-		log.Printf("no token row existed so created one")
 	}
-	// create a cookie for token
+
+	// create a token cookie
 	cookie := &http.Cookie{
 		Name:     "token",
 		Value:    token,
