@@ -20,3 +20,6 @@ up:
 down:
 	docker-compose down
 	docker image rm tv-tracker_api
+
+psql:
+	psql -U postgres -h localhost -d tv-tracker
