@@ -23,3 +23,6 @@ down:
 
 psql:
 	psql -U postgres -h localhost -d tv-tracker
+
+cmd:
+	docker exec -it tracker-rest-api bash
