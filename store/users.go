@@ -103,8 +103,11 @@ func (db *Store) CreateUser(userParams CreateUserParams) (models.Users, error) {
 	VALUES ($1, $2, $3, $4)
 	RETURNING id, created_at, updated_at, email, username, password
 	`
+	if userParams.CreatedAt == "" {
+		userParams.CreatedAt = util.GetCurrentDate()
+	}
 	row := db.conn.QueryRow(createUserQuery,
-		util.GetCurrentDate(),
+		userParams.CreatedAt,
 		userParams.Email,
 		userParams.Username,
 		userParams.Password,
@@ -127,11 +130,14 @@ func (db *Store) UpdateUser(userParams UpdateUserParams) (models.Users, error) {
 	WHERE id = $5
 	RETURNING id, created_at, updated_at, email, username, password
 	`
-	row := db.conn.QueryRow(updateUserQuery,
-		sql.NullString{
+	if !userParams.UpdatedAt.Valid {
+		userParams.UpdatedAt = sql.NullString{
 			String: util.GetCurrentDate(),
 			Valid:  true,
-		},
+		}
+	}
+	row := db.conn.QueryRow(updateUserQuery,
+		userParams.UpdatedAt,
 		userParams.Email,
 		userParams.Username,
 		userParams.Password,
