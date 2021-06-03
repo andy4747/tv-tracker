@@ -9,11 +9,11 @@ services:
         environment: 
             - POSTGRES_DB=tv-tracker
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_PASSWORD=root
         networks: 
             - fullstack
         volumes: 
-            - database_postgres:/var/lib/postgresql/data
+            - "./bin/db:/var/lib/postgresql/data"
 
     api: 
         build: .
@@ -27,8 +27,6 @@ services:
         networks: 
             - fullstack
         
-volumes: 
-    database_postgres: 
 
 networks: 
     fullstack: 
