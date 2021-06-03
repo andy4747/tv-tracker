@@ -18,8 +18,7 @@ var (
 	dbSSLMode  = os.Getenv("DB_SSL_MODE")
 )
 
-//172.24.0.2
-func Connect() *Queries {
+func Connect() *sql.DB {
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		dbHost,
@@ -30,17 +29,17 @@ func Connect() *Queries {
 		dbSSLMode,
 	)
 
-	conn, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("cannot connect to db: ", err)
 	}
-	err = conn.Ping()
+	err = db.Ping()
 	if err != nil {
 		log.Fatal("cannot ping the db: ", err)
 	}
 	//create all the schemas
 	err = CreateTableIfNotExists(
-		conn,
+		db,
 		usersTable,
 		tokensTable,
 	)
@@ -48,8 +47,6 @@ func Connect() *Queries {
 	if err != nil {
 		log.Fatalln("cannot create table: ", err.Error())
 	}
-
-	db := New(conn)
 	return db
 }
 
