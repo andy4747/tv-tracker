@@ -1,25 +1,37 @@
 package repository
 
 import (
-	"context"
 	"database/sql"
-	"log"
 
 	"github.com/angeldhakal/tv-tracker/models"
-	"github.com/angeldhakal/tv-tracker/util"
 )
 
 type UserRepository interface {
 	GetUser(int64) (models.Users, error)
 	GetUserByEmail(string) (models.Users, error)
 	ListUsers() ([]models.Users, error)
-	CreateUser(models.Users) (models.Users, error)
-	UpdateUser(models.Users) (models.Users, error)
+	CreateUser(CreateUserParams) (models.Users, error)
+	UpdateUser(UpdateUserParams) (models.Users, error)
 	DeleteUser(int64) error
 }
 
+type CreateUserParams struct {
+	CreatedAt string `json:"created_at"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+}
+
+type UpdateUserParams struct {
+	UpdatedAt sql.NullString `json:"updated_at"`
+	Email     string         `json:"email"`
+	Username  string         `json:"username"`
+	Password  string         `json:"password"`
+	ID        int64          `json:"id"`
+}
+
 type userRepo struct {
-	conn *models.Queries
+	conn *sql.DB
 }
 
 func NewUserRepository() UserRepository {
@@ -28,72 +40,125 @@ func NewUserRepository() UserRepository {
 	}
 }
 
-func (db *userRepo) GetUser(id int64) (user models.Users, err error) {
-	user, err = db.conn.GetUser(context.Background(), id)
-	if err != nil {
-		log.Println("userRepo GetUser: ", err.Error())
-		return models.Users{}, err
-	}
-	return user, nil
+func (db *userRepo) GetUser(id int64) (models.Users, error) {
+	getUserQuery := `SELECT id, created_at, updated_at, email, username, password
+				FROM users
+				WHERE id = $1`
+
+	row := db.conn.QueryRow(getUserQuery, id)
+	var user models.Users
+	err := row.Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Email,
+		&user.Username,
+		&user.Password,
+	)
+	return user, err
 }
 
-func (db *userRepo) GetUserByEmail(email string) (user models.Users, err error) {
-	user, err = db.conn.GetUserByEmail(context.Background(), email)
-	if err != nil {
-		log.Println("userRepo GetUserByEmail: ", err.Error())
-		return models.Users{}, err
-	}
-	return user, nil
+func (db *userRepo) GetUserByEmail(email string) (models.Users, error) {
+	getUserByEmailQuery := `SELECT id, created_at, updated_at, email, username, password
+						FROM users
+						WHERE email = $1`
+	row := db.conn.QueryRow(getUserByEmailQuery, email)
+	var user models.Users
+	err := row.Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Email,
+		&user.Username,
+		&user.Password,
+	)
+	return user, err
 }
 
-func (db *userRepo) ListUsers() (users []models.Users, err error) {
-	users, err = db.conn.ListUsers(context.Background())
+func (db *userRepo) ListUsers() ([]models.Users, error) {
+	listUsersQuery := `SELECT id, created_at, updated_at, email, username, password
+					FROM users;`
+	rows, err := db.conn.Query(listUsersQuery)
 	if err != nil {
-		log.Println("userRepo ListUsers: ", err.Error())
-		return []models.Users{}, err
+		return nil, err
 	}
-	return users, nil
+	defer rows.Close()
+	var items []models.Users
+	for rows.Next() {
+		var user models.Users
+		if err := rows.Scan(
+			&user.ID,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&user.Email,
+			&user.Username,
+			&user.Password,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, user)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
-func (db *userRepo) CreateUser(user models.Users) (createdUser models.Users, err error) {
-	userParams := models.CreateUserParams{
-		CreatedAt: util.GetCurrentDate(),
-		Email:     user.Email,
-		Username:  user.Username,
-		Password:  user.Password,
-	}
-	createdUser, err = db.conn.CreateUser(context.Background(), userParams)
-	if err != nil {
-		log.Println("userRepo CreateUser: ", err.Error())
-		return models.Users{}, err
-	}
-	return createdUser, nil
+func (db *userRepo) CreateUser(userParams CreateUserParams) (models.Users, error) {
+	createUserQuery := `INSERT INTO users (created_at, email, username, password)
+VALUES ($1, $2, $3, $4)
+RETURNING id, created_at, updated_at, email, username, password
+`
+	row := db.conn.QueryRow(createUserQuery,
+		userParams.CreatedAt,
+		userParams.Email,
+		userParams.Username,
+		userParams.Password,
+	)
+	var user models.Users
+	err := row.Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Email,
+		&user.Username,
+		&user.Password,
+	)
+	return user, err
 }
 
-func (db *userRepo) UpdateUser(user models.Users) (updatedUser models.Users, err error) {
-	userParams := models.UpdateUserParams{
-		ID: user.ID,
-		UpdatedAt: sql.NullString{
-			String: util.GetCurrentDate(),
-			Valid:  true,
-		},
-		Email:    user.Email,
-		Username: user.Username,
-		Password: user.Password,
-	}
-	updatedUser, err = db.conn.UpdateUser(context.Background(), userParams)
-	if err != nil {
-		log.Println("userRepo UpdateUser: ", err.Error())
-		return models.Users{}, err
-	}
-	return updatedUser, nil
+func (db *userRepo) UpdateUser(userParams UpdateUserParams) (models.Users, error) {
+	updateUserQuery := `UPDATE users
+SET updated_at = $1, email = $2, username = $3, password = $4
+WHERE id = $5
+RETURNING id, created_at, updated_at, email, username, password
+`
+	row := db.conn.QueryRow(updateUserQuery,
+		userParams.UpdatedAt,
+		userParams.Email,
+		userParams.Username,
+		userParams.Password,
+		userParams.ID,
+	)
+	var user models.Users
+	err := row.Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Email,
+		&user.Username,
+		&user.Password,
+	)
+	return user, err
 }
 
 func (db userRepo) DeleteUser(id int64) error {
-	err := db.conn.DeleteUser(context.Background(), id)
-	if err != nil {
-		log.Println("userRepo DeleteUser: ", err.Error())
-		return err
-	}
-	return nil
+	deleteUserQuery := `DELETE FROM users
+WHERE id = $1
+`
+	_, err := db.conn.Exec(deleteUserQuery, id)
+	return err
 }
