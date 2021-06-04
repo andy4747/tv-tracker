@@ -29,6 +29,7 @@ type UserStorer interface {
 	CreateUser(CreateUserParams) (models.Users, error)
 	UpdateUser(UpdateUserParams) (models.Users, error)
 	DeleteUser(int64) error
+	DeleteUserByEmail(string) error
 }
 
 func (db *Store) GetUser(id int64) (models.Users, error) {
@@ -155,10 +156,18 @@ func (db *Store) UpdateUser(userParams UpdateUserParams) (models.Users, error) {
 	return user, err
 }
 
-func (db Store) DeleteUser(id int64) error {
+func (db *Store) DeleteUser(id int64) error {
 	deleteUserQuery := `DELETE FROM users
 	WHERE id = $1
 	`
 	_, err := db.conn.Exec(deleteUserQuery, id)
+	return err
+}
+
+func (db *Store) DeleteUserByEmail(email string) error {
+	deleteUserQuery := `DELETE FROM users
+	WHERE email = $1
+	`
+	_, err := db.conn.Exec(deleteUserQuery, email)
 	return err
 }
