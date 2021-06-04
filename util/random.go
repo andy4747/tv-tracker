@@ -45,3 +45,9 @@ func RandomEmail() string {
 func RandomUsername() string {
 	return RandomString(7)
 }
+
+func RandomHashedPassword() (string, error) {
+	rawPass := RandomString(8)
+	pass, err := HashPassword(rawPass)
+	return pass, err
+}
