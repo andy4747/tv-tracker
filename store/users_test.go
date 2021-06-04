@@ -4,22 +4,22 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/angeldhakal/tv-tracker/models"
 	"github.com/angeldhakal/tv-tracker/util"
 	"github.com/stretchr/testify/require"
 )
 
 var Repo = NewStore()
 
-func TestCreateUser(t *testing.T) {
+func createRandomUser(t *testing.T) models.Users {
 	password := "root"
-
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
 	arg := CreateUserParams{
 		CreatedAt: util.GetCurrentDate(),
-		Email:     "angel@gmail.com",
-		Username:  "andy",
+		Email:     util.RandomEmail(),
+		Username:  util.RandomUsername(),
 		Password:  hashedPassword,
 	}
 
@@ -38,6 +38,26 @@ func TestCreateUser(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NotZero(t, user.ID)
+
+	return user
+}
+func TestCreateUser(t *testing.T) {
+	createRandomUser(t)
+}
+
+func TestGetUser(t *testing.T) {
+	user1 := createRandomUser(t)
+	user2, err := Repo.GetUser(user1.ID)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	//testing if all the fields of user1 is equal to user2
+	require.Equal(t, user1.ID, user2.ID)
+	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.CreatedAt, user2.CreatedAt)
+	require.Equal(t, user1.Username, user2.Username)
+	require.Equal(t, user1.Password, user2.Password)
 
 }
 
