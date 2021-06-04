@@ -40,3 +40,8 @@ func RandomEmail() string {
 	randomEmail := fmt.Sprintf("%s@%s", randomName, randomDomain)
 	return randomEmail
 }
+
+//RandomUsername returns a random 7 characters long username
+func RandomUsername() string {
+	return RandomString(7)
+}
