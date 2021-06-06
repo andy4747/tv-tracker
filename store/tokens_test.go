@@ -118,3 +118,15 @@ func TestUpdateToken(t *testing.T) {
 	require.True(t, token1.UpdatedAt.Valid)
 	require.NotZero(t, token1.ID)
 }
+
+func TestListTokens(t *testing.T) {
+	for i := 0; i <= 5; i++ {
+		createRandomToken(t)
+	}
+	tokens, err := Repo.ListTokens()
+	require.NoError(t, err)
+
+	for _, token := range tokens {
+		require.NotEmpty(t, token)
+	}
+}
