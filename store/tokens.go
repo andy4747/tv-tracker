@@ -118,8 +118,11 @@ func (db *Store) CreateToken(tokenParams CreateTokenParams) (models.Tokens, erro
 	VALUES ($1, $2, $3)
 	RETURNING id, created_at, updated_at, token, user_id
 	`
+	if tokenParams.CreatedAt == "" {
+		tokenParams.CreatedAt = util.GetCurrentDate()
+	}
 	row := db.conn.QueryRow(createToken,
-		util.GetCurrentDate(),
+		tokenParams.CreatedAt,
 		tokenParams.Token,
 		tokenParams.UserID,
 	)
@@ -140,11 +143,14 @@ func (db *Store) UpdateToken(tokenParams UpdateTokenParams) (models.Tokens, erro
 	WHERE id = $4
 	RETURNING id, created_at, updated_at, token, user_id
 	`
-	row := db.conn.QueryRow(updateToken,
-		sql.NullString{
+	if !tokenParams.UpdatedAt.Valid {
+		tokenParams.UpdatedAt = sql.NullString{
 			String: util.GetCurrentDate(),
 			Valid:  true,
-		},
+		}
+	}
+	row := db.conn.QueryRow(updateToken,
+		tokenParams.UpdatedAt,
 		tokenParams.Token,
 		tokenParams.UserID,
 		tokenParams.ID,
