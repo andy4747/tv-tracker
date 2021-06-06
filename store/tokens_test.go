@@ -80,3 +80,10 @@ func TestGetTokenByUser(t *testing.T) {
 	require.Equal(t, token.UpdatedAt.String, token1.UpdatedAt.String)
 	require.Equal(t, token.UpdatedAt.Valid, token1.UpdatedAt.Valid)
 }
+
+func TestDeleteToken(t *testing.T) {
+	token := createRandomToken(t)
+
+	err := Repo.DeleteToken(token.ID)
+	require.NoError(t, err)
+}
