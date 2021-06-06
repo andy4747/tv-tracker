@@ -65,3 +65,18 @@ func TestGetTokenByToken(t *testing.T) {
 	require.Equal(t, token.UpdatedAt.String, token1.UpdatedAt.String)
 	require.Equal(t, token.UpdatedAt.Valid, token1.UpdatedAt.Valid)
 }
+
+func TestGetTokenByUser(t *testing.T) {
+	token := createRandomToken(t)
+
+	token1, err := Repo.GetTokenByUser(token.UserID)
+	require.NoError(t, err)
+	require.NotEmpty(t, token1)
+
+	require.Equal(t, token.ID, token1.ID)
+	require.Equal(t, token.Token, token1.Token)
+	require.Equal(t, token.UserID, token1.UserID)
+	require.Equal(t, token.CreatedAt, token1.CreatedAt)
+	require.Equal(t, token.UpdatedAt.String, token1.UpdatedAt.String)
+	require.Equal(t, token.UpdatedAt.Valid, token1.UpdatedAt.Valid)
+}
