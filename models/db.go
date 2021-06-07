@@ -42,6 +42,10 @@ func Connect() *sql.DB {
 		db,
 		usersTable,
 		tokensTable,
+		moviesTable,
+		directorsTable,
+		genresTable,
+		movieGenreTable,
 	)
 
 	if err != nil {
