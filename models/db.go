@@ -44,6 +44,7 @@ func Connect() *sql.DB {
 		tokensTable,
 		moviesTable,
 		directorsTable,
+		movieDirectorsTable,
 		genresTable,
 		movieGenreTable,
 	)
