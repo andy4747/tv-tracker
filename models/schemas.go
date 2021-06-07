@@ -25,13 +25,15 @@ CREATE TABLE IF NOT EXISTS tokens (
 
 const moviesTable = `
 CREATE TABLE IF NOT EXISTS movies (
-    id BIGSERIAL NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGSERIAL NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT,
     name VARCHAR(255) NOT NULL,
     year DATE NOT NULL,
     length INTEGER NOT NULL,
-    language VARCHAR(55) NOT NULL 
+    language VARCHAR(55) NOT NULL,
+    CONSTRAINT users_movie_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
 const directorsTable = `
@@ -44,6 +46,18 @@ CREATE TABLE IF NOT EXISTS directors(
     nationality VARCHAR(55) NOT NULL,
     dob DATE NOT NULL,
     gender VARCHAR(6) NOT NULL
+);
+`
+
+const movieDirectorsTable = `
+CREATE TABLE IF NOT EXISTS movie_directors (
+    movie_id BIGSERIAL NOT NULL,
+    director_id BIGSERIAL NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT,
+    CONSTRAINT movie_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+    CONSTRAINT director_fk FOREIGN KEY (director_id) REFERENCES directors(id) ON DELETE CASCADE,
+    PRIMARY KEY(movie_id, director_id)
 );
 `
 
