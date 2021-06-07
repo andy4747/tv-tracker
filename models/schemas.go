@@ -57,10 +57,13 @@ CREATE TABLE IF NOT EXISTS genres (
 `
 
 const movieGenreTable = `
-CREATE TABLE IF NOT EXISTS genres (
-    id BIGSERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS movie_genres (
+    movie_id BIGSERIAL NOT NULL,
+    genre_id BIGSERIAL NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT,
-    name VARCHAR(25)
+    CONSTRAINT movie_fk FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+    CONSTRAINT genre_fk FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE,
+    PRIMARY KEY(movie_id, genre_id)
 );
 `
