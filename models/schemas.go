@@ -22,3 +22,45 @@ CREATE TABLE IF NOT EXISTS tokens (
     CONSTRAINT users_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
+
+const moviesTable = `
+CREATE TABLE IF NOT EXISTS movies (
+    id BIGSERIAL NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT,
+    name VARCHAR(255) NOT NULL,
+    year DATE NOT NULL,
+    length INTEGER NOT NULL,
+    language VARCHAR(55) NOT NULL 
+);
+`
+const directorsTable = `
+CREATE TABLE IF NOT EXISTS directors(
+    id BIGSERIAL PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    updated_at TEXT,
+    first_name VARCHAR(55) NOT NULL,
+    last_name VARCHAR(55) NOT NULL,
+    nationality VARCHAR(55) NOT NULL,
+    dob DATE NOT NULL,
+    gender VARCHAR(6) NOT NULL
+);
+`
+
+const genresTable = `
+CREATE TABLE IF NOT EXISTS genres (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    updated_at TEXT,
+    name VARCHAR(25)
+);
+`
+
+const movieGenreTable = `
+CREATE TABLE IF NOT EXISTS genres (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    updated_at TEXT,
+    name VARCHAR(25)
+);
+`
