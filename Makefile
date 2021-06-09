@@ -15,6 +15,7 @@ compile:
 	GOOS=windows GOARCH=amd64 go build -o bin/tv-tracker-windows-amd64 main.go
 
 up:
+	docker-compose build
 	docker-compose up
 
 down:
