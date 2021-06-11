@@ -25,10 +25,10 @@ type UpdateMovieParams struct {
 
 type MovieStorer interface {
 	GetMovie(int64) (models.Movies, error)
-	GetMovieByUser(int64) (models.Movies, error)
+	GetMoviesByUser(int64) ([]models.Movies, error)
 	CreateMovie(CreateMovieParams) (models.Movies, error)
 	UpdateMovie(UpdateMovieParams) (models.Movies, error)
-	DeleteToken(int64) (models.Movies, error)
+	DeleteMovie(int64) error
 	ListMovies() ([]models.Movies, error)
 }
 
@@ -48,20 +48,36 @@ func (db *Store) GetMovie(userID int64) (models.Movies, error) {
 	return movie, err
 }
 
-func (db *Store) GetMovieByUser(userID int64) (models.Movies, error) {
+func (db *Store) GetMoviesByUser(userID int64) ([]models.Movies, error) {
 	getMovieQuery := `SELECT id, created_at, updated_at, name, status, current_length, user_id FROM movies WHERE user_id=$1;
 	`
-	row := db.conn.QueryRow(getMovieQuery, userID)
-	var movie models.Movies
-	err := row.Scan(&movie.ID,
-		&movie.CreatedAt,
-		&movie.UpdatedAt,
-		&movie.Name,
-		&movie.Status,
-		&movie.CurrentLength,
-		&movie.UserID,
-	)
-	return movie, err
+	rows, err := db.conn.Query(getMovieQuery, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []models.Movies
+	for rows.Next() {
+		var movie models.Movies
+		if err := rows.Scan(&movie.ID,
+			&movie.CreatedAt,
+			&movie.UpdatedAt,
+			&movie.Name,
+			&movie.Status,
+			&movie.CurrentLength,
+			&movie.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, movie)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, err
 }
 
 func (db *Store) ListMovies() ([]models.Movies, error) {
