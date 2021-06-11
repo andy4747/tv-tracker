@@ -134,6 +134,7 @@ func (db *Store) CreateMovie(movieParams CreateMovieParams) (models.Movies, erro
 		&movie.ID,
 		&movie.CreatedAt,
 		&movie.UpdatedAt,
+		&movie.UserID,
 		&movie.Name,
 		&movie.Status,
 		&movie.CurrentLength,
@@ -145,7 +146,7 @@ func (db *Store) CreateMovie(movieParams CreateMovieParams) (models.Movies, erro
 
 func (db *Store) UpdateMovie(movieParams UpdateMovieParams) (models.Movies, error) {
 	updateToken := `UPDATE movies
-	SET updated_at = $1, name = $2, status = $3, current_length = $4,
+	SET updated_at = $1, name = $2, status = $3, current_length = $4
 	WHERE id = $5
 	RETURNING id, created_at, updated_at, user_id, name, status,current_length, language, total_length;
 	`
@@ -167,6 +168,7 @@ func (db *Store) UpdateMovie(movieParams UpdateMovieParams) (models.Movies, erro
 		&movie.ID,
 		&movie.CreatedAt,
 		&movie.UpdatedAt,
+		&movie.UserID,
 		&movie.Name,
 		&movie.Status,
 		&movie.CurrentLength,
