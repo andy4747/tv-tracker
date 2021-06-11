@@ -13,7 +13,7 @@ import (
 )
 
 type userHandler struct {
-	repo store.Storer
+	repo store.Tracker
 }
 
 func NewUserHandler() userHandler {
