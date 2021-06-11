@@ -23,7 +23,7 @@ type UpdateMovieParams struct {
 	ID            int64          `json:"id"`
 }
 
-type MovieStorer interface {
+type MovieTracker interface {
 	GetMovie(int64) (models.Movies, error)
 	GetMoviesByUser(int64) ([]models.Movies, error)
 	CreateMovie(CreateMovieParams) (models.Movies, error)

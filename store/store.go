@@ -10,14 +10,14 @@ type Store struct {
 	conn *sql.DB
 }
 
-func NewStore() Storer {
+func NewStore() Tracker {
 	return &Store{
 		conn: models.Connect(),
 	}
 }
 
-type Storer interface {
-	UserStorer
-	TokenStorer
-	MovieStorer
+type Tracker interface {
+	UserTracker
+	TokenTracker
+	MovieTracker
 }

@@ -22,7 +22,7 @@ type UpdateUserParams struct {
 	ID        int64          `json:"id"`
 }
 
-type UserStorer interface {
+type UserTracker interface {
 	GetUser(int64) (models.Users, error)
 	GetUserByEmail(string) (models.Users, error)
 	ListUsers() ([]models.Users, error)

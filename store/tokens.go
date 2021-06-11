@@ -11,7 +11,7 @@ type CreateTokenParams struct {
 	UserID    int64  `json:"user_id"`
 }
 
-type TokenStorer interface {
+type TokenTracker interface {
 	GetToken(int64) (models.Tokens, error)
 	GetTokenByToken(string) (models.Tokens, error)
 	GetTokenByUser(int64) (models.Tokens, error)
