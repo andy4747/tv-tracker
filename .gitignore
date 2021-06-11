@@ -1,5 +1,4 @@
 bin/
-go.sum
 .idea/
 queries/
 schemas/
