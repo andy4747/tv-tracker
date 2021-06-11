@@ -46,8 +46,14 @@ func RandomUsername() string {
 	return RandomString(7)
 }
 
+//RandomHashedPassword returns a hashed password and an error
 func RandomHashedPassword() (string, error) {
 	rawPass := RandomString(8)
 	pass, err := HashPassword(rawPass)
 	return pass, err
+}
+
+//RandomMovie returns a random movie name
+func RandomMovie() string {
+	return RandomString(12)
 }
