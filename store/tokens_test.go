@@ -1,7 +1,6 @@
 package store
 
 import (
-	"database/sql"
 	"testing"
 
 	"github.com/angeldhakal/tv-tracker/models"
@@ -87,36 +86,6 @@ func TestDeleteToken(t *testing.T) {
 
 	err := Repo.DeleteToken(token.ID)
 	require.NoError(t, err)
-}
-
-func TestUpdateToken(t *testing.T) {
-	token := createRandomToken(t)
-
-	arg := UpdateTokenParams{
-		UpdatedAt: sql.NullString{
-			String: util.GetCurrentDate(),
-			Valid:  true,
-		},
-		Token:  token.Token,
-		UserID: token.UserID,
-		ID:     token.ID,
-	}
-
-	//checking is updated_at is valid or not
-	require.True(t, arg.UpdatedAt.Valid)
-
-	token1, err := Repo.UpdateToken(arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, token1)
-
-	require.Equal(t, arg.UpdatedAt.String, token1.UpdatedAt.String)
-	require.Equal(t, arg.UpdatedAt.Valid, token1.UpdatedAt.Valid)
-	require.Equal(t, arg.Token, token1.Token)
-	require.Equal(t, arg.UserID, token1.UserID)
-	require.Equal(t, arg.ID, token1.ID)
-
-	require.True(t, token1.UpdatedAt.Valid)
-	require.NotZero(t, token1.ID)
 }
 
 func TestListTokens(t *testing.T) {
