@@ -39,6 +39,6 @@ CREATE TABLE IF NOT EXISTS movies (
 );
 `
 
-const statusType = `
-    CREATE TYPE STATUS AS ENUM ('c','w','p');
-`
+// const statusType = `
+//     CREATE TYPE STATUS AS ENUM ('c','w','p');
+// `

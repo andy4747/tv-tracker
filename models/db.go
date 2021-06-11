@@ -43,7 +43,6 @@ func Connect() *sql.DB {
 		usersTable,
 		tokensTable,
 		moviesTable,
-		statusType,
 	)
 
 	if err != nil {
