@@ -19,4 +19,5 @@ func NewStore() Storer {
 type Storer interface {
 	UserStorer
 	TokenStorer
+	MovieStorer
 }
