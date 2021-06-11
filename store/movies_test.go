@@ -14,10 +14,11 @@ func createRandomMovie(t *testing.T) models.Movies {
 	user := createRandomUser(t)
 
 	arg := CreateMovieParams{
-		CreatedAt: util.GetCurrentDate(),
-		UserID:    user.ID,
-		Name:      util.RandomMovie(),
-		Status:    models.Completed,
+		CreatedAt:     util.GetCurrentDate(),
+		UserID:        user.ID,
+		Name:          util.RandomMovie(),
+		Status:        models.Completed,
+		CurrentLength: 0,
 	}
 
 	movie, err := Repo.CreateMovie(arg)
