@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS movies (
     name VARCHAR(255) NOT NULL,
     status STATUS NOT NULL,
     current_length INTEGER,
-    year DATE NOT NULL,
-    total_length INTEGER NOT NULL,
-    language VARCHAR(55) NOT NULL,
+    year DATE,
+    total_length INTEGER,
+    language VARCHAR(55),
     CONSTRAINT users_movie_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
