@@ -1,8 +1,6 @@
 package store
 
 import (
-	"database/sql"
-
 	"github.com/angeldhakal/tv-tracker/models"
 	"github.com/angeldhakal/tv-tracker/util"
 )
@@ -13,20 +11,12 @@ type CreateTokenParams struct {
 	UserID    int64  `json:"user_id"`
 }
 
-type UpdateTokenParams struct {
-	UpdatedAt sql.NullString `json:"updated_at"`
-	Token     string         `json:"token"`
-	UserID    int64          `json:"user_id"`
-	ID        int64          `json:"id"`
-}
-
 type TokenStorer interface {
 	GetToken(int64) (models.Tokens, error)
 	GetTokenByToken(string) (models.Tokens, error)
 	GetTokenByUser(int64) (models.Tokens, error)
 	ListTokens() ([]models.Tokens, error)
 	CreateToken(CreateTokenParams) (models.Tokens, error)
-	UpdateToken(UpdateTokenParams) (models.Tokens, error)
 	DeleteToken(int64) error
 }
 
@@ -125,35 +115,6 @@ func (db *Store) CreateToken(tokenParams CreateTokenParams) (models.Tokens, erro
 		tokenParams.CreatedAt,
 		tokenParams.Token,
 		tokenParams.UserID,
-	)
-	var token models.Tokens
-	err := row.Scan(
-		&token.ID,
-		&token.CreatedAt,
-		&token.UpdatedAt,
-		&token.Token,
-		&token.UserID,
-	)
-	return token, err
-}
-
-func (db *Store) UpdateToken(tokenParams UpdateTokenParams) (models.Tokens, error) {
-	updateToken := `UPDATE tokens
-	SET updated_at = $1, token = $2, user_id = $3
-	WHERE id = $4
-	RETURNING id, created_at, updated_at, token, user_id
-	`
-	if !tokenParams.UpdatedAt.Valid {
-		tokenParams.UpdatedAt = sql.NullString{
-			String: util.GetCurrentDate(),
-			Valid:  true,
-		}
-	}
-	row := db.conn.QueryRow(updateToken,
-		tokenParams.UpdatedAt,
-		tokenParams.Token,
-		tokenParams.UserID,
-		tokenParams.ID,
 	)
 	var token models.Tokens
 	err := row.Scan(
