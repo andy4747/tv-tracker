@@ -22,6 +22,10 @@ type UpdateUserParams struct {
 	ID        int64          `json:"id"`
 }
 
+type userStore struct {
+	conn *sql.DB
+}
+
 type UserTracker interface {
 	GetUser(int64) (models.Users, error)
 	GetUserByEmail(string) (models.Users, error)
@@ -32,7 +36,7 @@ type UserTracker interface {
 	DeleteUserByEmail(string) error
 }
 
-func (db *Store) GetUser(id int64) (models.Users, error) {
+func (db *userStore) GetUser(id int64) (models.Users, error) {
 	getUserQuery := `SELECT id, created_at, updated_at, email, username, password
 	FROM users
 	WHERE id = $1`
@@ -50,7 +54,7 @@ func (db *Store) GetUser(id int64) (models.Users, error) {
 	return user, err
 }
 
-func (db *Store) GetUserByEmail(email string) (models.Users, error) {
+func (db *userStore) GetUserByEmail(email string) (models.Users, error) {
 	getUserByEmailQuery := `SELECT id, created_at, updated_at, email, username, password
 	FROM users
 	WHERE email = $1`
@@ -67,7 +71,7 @@ func (db *Store) GetUserByEmail(email string) (models.Users, error) {
 	return user, err
 }
 
-func (db *Store) ListUsers() ([]models.Users, error) {
+func (db *userStore) ListUsers() ([]models.Users, error) {
 	listUsersQuery := `SELECT id, created_at, updated_at, email, username, password
 	FROM users;`
 	rows, err := db.conn.Query(listUsersQuery)
@@ -99,7 +103,7 @@ func (db *Store) ListUsers() ([]models.Users, error) {
 	return items, nil
 }
 
-func (db *Store) CreateUser(userParams CreateUserParams) (models.Users, error) {
+func (db *userStore) CreateUser(userParams CreateUserParams) (models.Users, error) {
 	createUserQuery := `INSERT INTO users (created_at, email, username, password)
 	VALUES ($1, $2, $3, $4)
 	RETURNING id, created_at, updated_at, email, username, password
@@ -125,7 +129,7 @@ func (db *Store) CreateUser(userParams CreateUserParams) (models.Users, error) {
 	return user, err
 }
 
-func (db *Store) UpdateUser(userParams UpdateUserParams) (models.Users, error) {
+func (db *userStore) UpdateUser(userParams UpdateUserParams) (models.Users, error) {
 	updateUserQuery := `UPDATE users
 	SET updated_at = $1, email = $2, username = $3, password = $4
 	WHERE id = $5
@@ -156,7 +160,7 @@ func (db *Store) UpdateUser(userParams UpdateUserParams) (models.Users, error) {
 	return user, err
 }
 
-func (db *Store) DeleteUser(id int64) error {
+func (db *userStore) DeleteUser(id int64) error {
 	deleteUserQuery := `DELETE FROM users
 	WHERE id = $1
 	`
@@ -164,7 +168,7 @@ func (db *Store) DeleteUser(id int64) error {
 	return err
 }
 
-func (db *Store) DeleteUserByEmail(email string) error {
+func (db *userStore) DeleteUserByEmail(email string) error {
 	deleteUserQuery := `DELETE FROM users
 	WHERE email = $1
 	`

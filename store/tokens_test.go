@@ -8,6 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var tokenRepo = NewTokenStore()
+
 func createRandomToken(t *testing.T) models.Tokens {
 	user := createRandomUser(t)
 
@@ -17,7 +19,7 @@ func createRandomToken(t *testing.T) models.Tokens {
 		UserID:    user.ID,
 	}
 
-	token, err := Repo.CreateToken(arg)
+	token, err := tokenRepo.CreateToken(arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
@@ -39,7 +41,7 @@ func TestCreateToken(t *testing.T) {
 func TestGetToken(t *testing.T) {
 	token := createRandomToken(t)
 
-	token1, err := Repo.GetToken(token.ID)
+	token1, err := tokenRepo.GetToken(token.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, token1)
 
@@ -54,7 +56,7 @@ func TestGetToken(t *testing.T) {
 func TestGetTokenByToken(t *testing.T) {
 	token := createRandomToken(t)
 
-	token1, err := Repo.GetTokenByToken(token.Token)
+	token1, err := tokenRepo.GetTokenByToken(token.Token)
 	require.NoError(t, err)
 	require.NotEmpty(t, token1)
 
@@ -69,7 +71,7 @@ func TestGetTokenByToken(t *testing.T) {
 func TestGetTokenByUser(t *testing.T) {
 	token := createRandomToken(t)
 
-	token1, err := Repo.GetTokenByUser(token.UserID)
+	token1, err := tokenRepo.GetTokenByUser(token.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, token1)
 
@@ -84,7 +86,7 @@ func TestGetTokenByUser(t *testing.T) {
 func TestDeleteToken(t *testing.T) {
 	token := createRandomToken(t)
 
-	err := Repo.DeleteToken(token.ID)
+	err := tokenRepo.DeleteToken(token.ID)
 	require.NoError(t, err)
 }
 
@@ -92,7 +94,7 @@ func TestListTokens(t *testing.T) {
 	for i := 0; i <= 5; i++ {
 		createRandomToken(t)
 	}
-	tokens, err := Repo.ListTokens()
+	tokens, err := tokenRepo.ListTokens()
 	require.NoError(t, err)
 
 	for _, token := range tokens {

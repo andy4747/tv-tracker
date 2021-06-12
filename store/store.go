@@ -1,23 +1,23 @@
 package store
 
 import (
-	"database/sql"
-
 	"github.com/angeldhakal/tv-tracker/models"
 )
 
-type Store struct {
-	conn *sql.DB
-}
-
-func NewStore() Tracker {
-	return &Store{
+func NewUserStore() UserTracker {
+	return &userStore{
 		conn: models.Connect(),
 	}
 }
 
-type Tracker interface {
-	UserTracker
-	TokenTracker
-	MovieTracker
+func NewTokenStore() TokenTracker {
+	return &tokenStore{
+		conn: models.Connect(),
+	}
+}
+
+func NewMovieStore() MovieTracker {
+	return &movieStore{
+		conn: models.Connect(),
+	}
 }

@@ -32,7 +32,11 @@ type MovieTracker interface {
 	ListMovies() ([]models.Movies, error)
 }
 
-func (db *Store) GetMovie(userID int64) (models.Movies, error) {
+type movieStore struct {
+	conn *sql.DB
+}
+
+func (db *movieStore) GetMovie(userID int64) (models.Movies, error) {
 	getMovieQuery := `SELECT id, created_at, updated_at, name, status, current_length, user_id FROM movies WHERE id=$1;
 	`
 	row := db.conn.QueryRow(getMovieQuery, userID)
@@ -48,7 +52,7 @@ func (db *Store) GetMovie(userID int64) (models.Movies, error) {
 	return movie, err
 }
 
-func (db *Store) GetMoviesByUser(userID int64) ([]models.Movies, error) {
+func (db *movieStore) GetMoviesByUser(userID int64) ([]models.Movies, error) {
 	getMovieQuery := `SELECT id, created_at, updated_at, name, status, current_length, user_id FROM movies WHERE user_id=$1;
 	`
 	rows, err := db.conn.Query(getMovieQuery, userID)
@@ -80,7 +84,7 @@ func (db *Store) GetMoviesByUser(userID int64) ([]models.Movies, error) {
 	return items, err
 }
 
-func (db *Store) ListMovies() ([]models.Movies, error) {
+func (db *movieStore) ListMovies() ([]models.Movies, error) {
 	listTokens := `SELECT id, created_at, updated_at, name, status, current_length, user_id FROM movies;
 	`
 	rows, err := db.conn.Query(listTokens)
@@ -113,7 +117,7 @@ func (db *Store) ListMovies() ([]models.Movies, error) {
 	return items, nil
 }
 
-func (db *Store) CreateMovie(movieParams CreateMovieParams) (models.Movies, error) {
+func (db *movieStore) CreateMovie(movieParams CreateMovieParams) (models.Movies, error) {
 	createMovie := `INSERT INTO movies (created_at, user_id, name, status, current_length)
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, created_at, updated_at, user_id, name, status, current_length
@@ -144,7 +148,7 @@ func (db *Store) CreateMovie(movieParams CreateMovieParams) (models.Movies, erro
 	return movie, err
 }
 
-func (db *Store) UpdateMovie(movieParams UpdateMovieParams) (models.Movies, error) {
+func (db *movieStore) UpdateMovie(movieParams UpdateMovieParams) (models.Movies, error) {
 	updateToken := `UPDATE movies
 	SET updated_at = $1, name = $2, status = $3, current_length = $4
 	WHERE id = $5
@@ -178,7 +182,7 @@ func (db *Store) UpdateMovie(movieParams UpdateMovieParams) (models.Movies, erro
 	return movie, err
 }
 
-func (db *Store) DeleteMovie(userID int64) error {
+func (db *movieStore) DeleteMovie(userID int64) error {
 	deleteToken := `DELETE FROM movies
 	WHERE id = $1
 	`

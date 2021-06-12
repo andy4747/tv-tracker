@@ -1,6 +1,8 @@
 package store
 
 import (
+	"database/sql"
+
 	"github.com/angeldhakal/tv-tracker/models"
 	"github.com/angeldhakal/tv-tracker/util"
 )
@@ -20,7 +22,11 @@ type TokenTracker interface {
 	DeleteToken(int64) error
 }
 
-func (db *Store) GetToken(userID int64) (models.Tokens, error) {
+type tokenStore struct {
+	conn *sql.DB
+}
+
+func (db *tokenStore) GetToken(userID int64) (models.Tokens, error) {
 	getToken := `SELECT id, created_at, updated_at, token, user_id
 	FROM tokens
 	WHERE id = $1
@@ -37,7 +43,7 @@ func (db *Store) GetToken(userID int64) (models.Tokens, error) {
 	return token, err
 }
 
-func (db *Store) GetTokenByToken(token string) (models.Tokens, error) {
+func (db *tokenStore) GetTokenByToken(token string) (models.Tokens, error) {
 	getTokenByToken := `SELECT id, created_at, updated_at, token, user_id
 	FROM tokens
 	WHERE token = $1
@@ -54,7 +60,7 @@ func (db *Store) GetTokenByToken(token string) (models.Tokens, error) {
 	return retrievedToken, err
 }
 
-func (db *Store) GetTokenByUser(userID int64) (models.Tokens, error) {
+func (db *tokenStore) GetTokenByUser(userID int64) (models.Tokens, error) {
 	getTokenByUser := `SELECT id, created_at, updated_at, token, user_id
 	FROM tokens
 	WHERE user_id = $1
@@ -71,7 +77,7 @@ func (db *Store) GetTokenByUser(userID int64) (models.Tokens, error) {
 	return token, err
 }
 
-func (db *Store) ListTokens() ([]models.Tokens, error) {
+func (db *tokenStore) ListTokens() ([]models.Tokens, error) {
 	listTokens := `SELECT id, created_at, updated_at, token, user_id
 	FROM tokens
 	`
@@ -103,7 +109,7 @@ func (db *Store) ListTokens() ([]models.Tokens, error) {
 	return items, nil
 }
 
-func (db *Store) CreateToken(tokenParams CreateTokenParams) (models.Tokens, error) {
+func (db *tokenStore) CreateToken(tokenParams CreateTokenParams) (models.Tokens, error) {
 	createToken := `INSERT INTO tokens (created_at, token, user_id)
 	VALUES ($1, $2, $3)
 	RETURNING id, created_at, updated_at, token, user_id
@@ -127,7 +133,7 @@ func (db *Store) CreateToken(tokenParams CreateTokenParams) (models.Tokens, erro
 	return token, err
 }
 
-func (db *Store) DeleteToken(userID int64) error {
+func (db *tokenStore) DeleteToken(userID int64) error {
 	deleteToken := `DELETE FROM tokens
 	WHERE id = $1
 	`

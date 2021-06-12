@@ -13,24 +13,26 @@ import (
 )
 
 type userHandler struct {
-	repo store.Tracker
+	userRepo  store.UserTracker
+	tokenRepo store.TokenTracker
 }
 
 func NewUserHandler() userHandler {
 	return userHandler{
-		repo: store.NewStore(),
+		userRepo:  store.NewUserStore(),
+		tokenRepo: store.NewTokenStore(),
 	}
 }
 
 func (h *userHandler) Logout(ctx *gin.Context) {
 	tokenFromRequest := ctx.GetHeader("token")
-	userToken, err := h.repo.GetTokenByToken(tokenFromRequest)
+	userToken, err := h.tokenRepo.GetTokenByToken(tokenFromRequest)
 	if err != nil {
 		log.Printf("token not found err: %v", err)
 		ctx.JSON(http.StatusNotFound, "token not found")
 		return
 	}
-	err = h.repo.DeleteToken(userToken.ID)
+	err = h.tokenRepo.DeleteToken(userToken.ID)
 	if err != nil {
 		log.Printf("some error occurred err: %v", err)
 		ctx.JSON(http.StatusInternalServerError, "")
@@ -49,7 +51,7 @@ func (h *userHandler) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, "please enter valid credentials")
 		return
 	}
-	user, err := h.repo.GetUserByEmail(credential.Email)
+	user, err := h.userRepo.GetUserByEmail(credential.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, fmt.Sprintf("Email \"%s\" not registered", credential.Email))
@@ -67,7 +69,7 @@ func (h *userHandler) Login(ctx *gin.Context) {
 	}
 
 	var token string
-	userToken, err := h.repo.GetTokenByUser(user.ID)
+	userToken, err := h.tokenRepo.GetTokenByUser(user.ID)
 	token = userToken.Token
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -75,7 +77,7 @@ func (h *userHandler) Login(ctx *gin.Context) {
 			fmt.Println(generatedToken)
 
 			//saving session token in the db
-			savedToken, err := h.repo.CreateToken(store.CreateTokenParams{
+			savedToken, err := h.tokenRepo.CreateToken(store.CreateTokenParams{
 				CreatedAt: util.GetCurrentDate(),
 				Token:     generatedToken,
 				UserID:    user.ID,
@@ -133,7 +135,7 @@ func (h *userHandler) Signup(ctx *gin.Context) {
 	userParam.Password = hashedPassword
 
 	//add user credential in the database
-	addedUser, err := h.repo.CreateUser(userParam)
+	addedUser, err := h.userRepo.CreateUser(userParam)
 	if err != nil {
 		log.Println(err.Error())
 		ctx.JSON(http.StatusBadRequest, "Email already taken.")
@@ -155,7 +157,7 @@ func (h *userHandler) DeleteUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, "enter valid email and password")
 		return
 	}
-	retrievedUser, err := h.repo.GetUserByEmail(credential.Email)
+	retrievedUser, err := h.userRepo.GetUserByEmail(credential.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No user found with %s as email", credential.Email)
@@ -173,7 +175,7 @@ func (h *userHandler) DeleteUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, "password don't match. try again...")
 		return
 	}
-	err = h.repo.DeleteUser(retrievedUser.ID)
+	err = h.userRepo.DeleteUser(retrievedUser.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("user doesn't exist")

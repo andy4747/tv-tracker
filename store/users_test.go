@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var Repo = NewStore()
+var userRepo = NewUserStore()
 
 func createRandomUser(t *testing.T) models.Users {
 	hashedPassword, err := util.RandomHashedPassword()
@@ -23,7 +23,7 @@ func createRandomUser(t *testing.T) models.Users {
 	}
 
 	//creating a user
-	user, err := Repo.CreateUser(arg)
+	user, err := userRepo.CreateUser(arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
@@ -43,7 +43,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := Repo.GetUser(user1.ID)
+	user2, err := userRepo.GetUser(user1.ID)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
@@ -59,7 +59,7 @@ func TestGetUser(t *testing.T) {
 
 func TestGetUserByEmail(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := Repo.GetUserByEmail(user1.Email)
+	user2, err := userRepo.GetUserByEmail(user1.Email)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
@@ -92,7 +92,7 @@ func TestUpdateUser(t *testing.T) {
 	//checking is updated_at is valid or not
 	require.True(t, arg.UpdatedAt.Valid)
 
-	user1, err := Repo.UpdateUser(arg)
+	user1, err := userRepo.UpdateUser(arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user1)
 
@@ -110,14 +110,14 @@ func TestUpdateUser(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	user := createRandomUser(t)
 
-	err := Repo.DeleteUser(user.ID)
+	err := userRepo.DeleteUser(user.ID)
 	require.NoError(t, err)
 }
 
 func TestDeleteUserByEmail(t *testing.T) {
 	user := createRandomUser(t)
 
-	err := Repo.DeleteUserByEmail(user.Email)
+	err := userRepo.DeleteUserByEmail(user.Email)
 	require.NoError(t, err)
 }
 
@@ -125,7 +125,7 @@ func TestListUsers(t *testing.T) {
 	for i := 0; i <= 10; i++ {
 		createRandomUser(t)
 	}
-	users, err := Repo.ListUsers()
+	users, err := userRepo.ListUsers()
 	require.NoError(t, err)
 
 	for _, user := range users {

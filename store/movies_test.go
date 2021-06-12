@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var movieRepo = NewMovieStore()
+
 func createRandomMovie(t *testing.T) models.Movies {
 	user := createRandomUser(t)
 
@@ -21,7 +23,7 @@ func createRandomMovie(t *testing.T) models.Movies {
 		CurrentLength: 0,
 	}
 
-	movie, err := Repo.CreateMovie(arg)
+	movie, err := movieRepo.CreateMovie(arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, movie)
@@ -45,7 +47,7 @@ func TestCreateMovie(t *testing.T) {
 func TestGetMovie(t *testing.T) {
 	movie := createRandomMovie(t)
 
-	movie1, err := Repo.GetMovie(movie.ID)
+	movie1, err := movieRepo.GetMovie(movie.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, movie1)
 
@@ -61,7 +63,7 @@ func TestGetMovieByUser(t *testing.T) {
 	for i := 0; i <= 5; i++ {
 		createRandomMovie(t)
 	}
-	movies, err := Repo.ListMovies()
+	movies, err := movieRepo.ListMovies()
 	require.NoError(t, err)
 
 	for _, movie := range movies {
@@ -86,7 +88,7 @@ func TestUpdateMovie(t *testing.T) {
 	//checking is updated_at is valid or not
 	require.True(t, arg.UpdatedAt.Valid)
 
-	movie1, err := Repo.UpdateMovie(arg)
+	movie1, err := movieRepo.UpdateMovie(arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, movie1)
 	require.NotZero(t, movie1.ID)
@@ -101,7 +103,7 @@ func TestUpdateMovie(t *testing.T) {
 func TestDeleteMovie(t *testing.T) {
 	movie := createRandomMovie(t)
 
-	err := Repo.DeleteMovie(movie.ID)
+	err := movieRepo.DeleteMovie(movie.ID)
 	require.NoError(t, err)
 }
 
@@ -109,7 +111,7 @@ func TestListMovies(t *testing.T) {
 	for i := 0; i <= 5; i++ {
 		createRandomMovie(t)
 	}
-	movies, err := Repo.ListMovies()
+	movies, err := movieRepo.ListMovies()
 	require.NoError(t, err)
 
 	for _, movie := range movies {
