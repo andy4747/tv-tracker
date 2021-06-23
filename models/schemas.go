@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS movies (
     name VARCHAR(255) NOT NULL,
     status VARCHAR(1) NOT NULL,
     current_length BIGINT DEFAULT 0,
-    year DATE DEFAULT '1970-01-01',
-    total_length BIGINT DEFAULT 0,
+    -- year DATE DEFAULT '1970-01-01',
+    -- total_length BIGINT DEFAULT 0,
     language VARCHAR(255) DEFAULT 'english',
     CONSTRAINT users_movie_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"time"
 )
 
 type Status string
@@ -38,7 +37,9 @@ type Movies struct {
 	Name          string         `json:"name"`
 	Status        Status         `json:"status"`
 	CurrentLength int64          `json:"current_length"`
-	Year          time.Time      `json:"year"`
 	Language      string         `json:"language"`
-	TotalLength   int64          `json:"total_length"`
 }
+
+var EmptyObject = make(map[string]string)
+
+var EmptyMovieList = []Movies{}

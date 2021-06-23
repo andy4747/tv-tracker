@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/angeldhakal/tv-tracker/store"
 	"github.com/angeldhakal/tv-tracker/util"
@@ -25,12 +24,21 @@ func NewUserHandler() userHandler {
 }
 
 func (h *userHandler) Logout(ctx *gin.Context) {
-	tokenFromRequest := ctx.GetHeader("token")
-	userToken, err := h.tokenRepo.GetTokenByToken(tokenFromRequest)
+	tokenCookie, err := ctx.Cookie("token")
 	if err != nil {
-		log.Printf("token not found err: %v", err)
-		ctx.JSON(http.StatusNotFound, "token not found")
+		ctx.JSON(http.StatusInternalServerError, "couldn't retrieve cookie")
 		return
+	}
+	userToken, err := h.tokenRepo.GetTokenByToken(tokenCookie)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("token not found err: %v", err)
+			ctx.JSON(http.StatusNotFound, "token not found")
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, "some error occurred")
+			return
+		}
 	}
 	err = h.tokenRepo.DeleteToken(userToken.ID)
 	if err != nil {
@@ -38,10 +46,17 @@ func (h *userHandler) Logout(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, "")
 		return
 	}
+	ctx.SetCookie("token", "", -1, "", "", false, true)
 	ctx.JSON(http.StatusOK, "Successfully Logged Out")
 }
 
 func (h *userHandler) Login(ctx *gin.Context) {
+	cookie, _ := ctx.Cookie("token")
+	msg := fmt.Sprintf("first logout and you can login again. token = %s", cookie)
+	if cookie != "" {
+		ctx.JSON(http.StatusForbidden, msg)
+		return
+	}
 	var credential util.LoginCredentials
 	if err := ctx.ShouldBindJSON(&credential); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, "enter valid json")
@@ -97,15 +112,32 @@ func (h *userHandler) Login(ctx *gin.Context) {
 		}
 	}
 
-	// create a token cookie
-	cookie := &http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Expires:  time.Now().Add(12 * time.Hour),
-		HttpOnly: true,
-	}
-	http.SetCookie(ctx.Writer, cookie)
+	ctx.SetCookie("token", token, 3600, "/", "localhost", false, true)
+	ctx.Header("token", token)
 	ctx.JSON(http.StatusOK, token)
+}
+
+func (h *userHandler) GetUser(ctx *gin.Context) {
+	cookie, err := ctx.Cookie("token")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, "no cookie found")
+		return
+	}
+	userDetails, err := store.GetUserByToken(cookie)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("user doesn't exist")
+			ctx.JSON(http.StatusNotFound, "user doesn't exists")
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, "some error occurred")
+			return
+		}
+	}
+	sendCredentials := make(map[string]string)
+	sendCredentials["email"] = userDetails.Email
+	sendCredentials["username"] = userDetails.Username
+	ctx.JSON(http.StatusOK, sendCredentials)
 }
 
 func (h *userHandler) Signup(ctx *gin.Context) {
@@ -187,5 +219,6 @@ func (h *userHandler) DeleteUser(ctx *gin.Context) {
 			return
 		}
 	}
+	ctx.SetCookie("token", "", -1, "", "", false, true)
 	ctx.JSON(http.StatusOK, "Successfully Deleted")
 }
