@@ -4,8 +4,7 @@ import { Navbar } from '../Navbar';
 export const Home: FC = () => {
 	return (
 		<>
-			<Navbar />
-			<p>Home Page</p>
+			<Navbar auth={false} user={{}} />
 		</>
 	);
 };
