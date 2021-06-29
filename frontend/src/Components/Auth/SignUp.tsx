@@ -12,7 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import React, { ChangeEvent, FC, SyntheticEvent, useState } from 'react';
 import { RouterProps } from 'react-router';
 import { API_PROXY } from '../../Utils/Constants';
-import { Copyright } from '../Copyright';
+import { Copyright } from '../Home/Copyright';
 
 const useStyles = makeStyles((theme) => ({
 	paper: {
