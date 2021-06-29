@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 import { BrowserRouter as Router, Switch } from 'react-router-dom';
 import './App.css';
-import { Home } from './Components/Auth/Home';
 import Login from './Components/Auth/Login';
 import { SignUp } from './Components/Auth/SignUp';
+import { Home } from './Components/Home/Home';
 import { Dashboard } from './Components/Private/Dashboard';
-import { PrivateRoute } from './Utils/PrivateRouter';
+import { PrivateRoute } from './Utils/PrivateRoute';
 import { PublicRoute } from './Utils/PublicRoute';
 
 export const App: FC = () => {
