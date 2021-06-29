@@ -12,7 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import React, { ChangeEvent, FC, SyntheticEvent, useState } from 'react';
 import { RouterProps, withRouter } from 'react-router';
 import { API_PROXY } from '../../Utils/Constants';
-import { Copyright } from '../Copyright';
+import { Copyright } from '../Home/Copyright';
 
 const useStyles = makeStyles((theme) => ({
 	paper: {
@@ -41,7 +41,7 @@ const Login: FC<RouterProps> = ({ history }: RouterProps) => {
 
 	const loginHandler = async (e: SyntheticEvent) => {
 		e.preventDefault();
-		await fetch(`${API_PROXY}/api/auth/login`, {
+		const response = await fetch(`${API_PROXY}/api/auth/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			credentials: 'include',
@@ -50,7 +50,14 @@ const Login: FC<RouterProps> = ({ history }: RouterProps) => {
 				password: password,
 			}),
 		});
-		history.push('/dashboard');
+		const status = await response.status;
+		if (status === 200) {
+			history.push('/dashboard');
+		} else {
+			history.push('/login');
+			setPassword('');
+			setEmail('');
+		}
 	};
 
 	return (
