@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { User } from '../../Utils/Types';
-import { Navbar } from '../Navbar';
+import { Navbar } from '../Home/Navbar';
 
 interface Props {
 	user: User;
