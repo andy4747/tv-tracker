@@ -17,3 +17,4 @@ ENDPOINTS
  - /api/auth/login    ==> Login User
  - /api/auth/logout   ==> Logout User
  - /api/auth/de-register ==> Delete User
+ - ... and many more
